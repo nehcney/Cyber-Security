@@ -4,7 +4,8 @@
 // horizontal component links the different keys within the same hash bucket,
 // and the vertical component links nodes with the same key. These are linked with
 // the BinaryFile::Offset variables next_key and next_equal, respectively (Offset
-// is an int that corresponds to the address location on disk).
+// is an int that corresponds to the address location on disk). Each DiskNode
+// associates a "key" string with a pair of string values "value" and "context".
 //
 // Each DiskMultiMap disk file contains the following information:
 //   - A Header struct that includes:
