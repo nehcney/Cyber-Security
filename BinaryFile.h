@@ -1,3 +1,6 @@
+// The BinaryFile class is used to write data to and read data from a file on disk.
+// Written by Carey Nachenberg.
+
 #ifndef BINARYFILE_H_
 #define BINARYFILE_H_
 
