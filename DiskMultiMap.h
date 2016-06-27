@@ -1,3 +1,20 @@
+// DiskMultiMap is a disk-based multimap hash table. Uses a hand-coded Iterator
+// with a small cache. Structurally, the multimap is implemented as a disk-based
+// open hash table with "horizontal" and "vertical" singly-linked lists: the
+// horizontal component links the different keys within the same hash bucket,
+// and the vertical component links nodes with the same key. These are linked with
+// the BinaryFile::Offset variables next_key and next_equal, respectively (Offset
+// is an int that corresponds to the address location on disk).
+//
+// Each DiskMultiMap disk file contains the following information:
+//   - A Header struct that includes:
+//       - Number of buckets (unsigned int)
+//       - Offset of the next freespace DiskNode
+//           - (For this I used a separate linked list. Each time a DiskNode was 
+//             "deleted", it was added to the freespace linked list)
+//   - "Array" of buckets, each containing the Offset of a DiskNode's location
+//   - All data that follows are the actual DiskNodes
+
 #ifndef DISKMULTIMAP_H_
 #define DISKMULTIMAP_H_
 
@@ -13,9 +30,6 @@
 #include "BinaryFile.h"
 
 // Global Variables
-//const BinaryFile::Offset NUMBUCKETSOFFSET = 0;
-//const BinaryFile::Offset FREESPACEOFFSET = sizeof(int);
-//const BinaryFile::Offset HASHOFFSET = FREESPACEOFFSET + sizeof(int32_t);
 const BinaryFile::Offset CHARLIMIT = 120;
 
 class DiskMultiMap
