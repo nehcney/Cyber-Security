@@ -1,3 +1,6 @@
+// The InteractionTuple structure details what machine the interaction took place on (context),
+// the initiator of the interaction (from), and the target of the interaction (to).
+
 #ifndef INTERACTIONTUPLE_H_
 #define INTERACTIONTUPLE_H_
 
