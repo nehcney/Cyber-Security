@@ -1,3 +1,29 @@
+// The IntelWeb class is responsible for loading all of the log data from one or more
+// telemetry log data files, placing this data onto disk (using DiskMultiMap class),
+// and discovering new attacks by searching through this data structure. It can also
+// purge specific telemetry data items from its data structures.
+//
+// In order to facilitate malicious entity discovery in both directions (ie. a known
+// malicious website downloading an unknown file would implicate the file, but also
+// an unknown website downloading a known malicious file would implicate the website!)
+// we create two DiskMultiMaps, one called forward (ie. A creates B, where A is the key)
+// and one called reverse (ie. B is created by A, where B is the key) so that both the 
+// creator and the created can be discovered by searching our hash tables.
+//
+// ingest() - simply inserts all the data from a telemetry log file of the specified name
+//     into the appropriate disk-based data structures (DiskMultiMap).
+// crawl() - responsible for (a) discovering and outputting an ordered vector of all 
+//     malicious entities found in the previously-ingested telemetry, and (b) outputting
+//     an ordered vector of every interaction discovered that includes at least one
+//     malicious entity, by "crawling" through the ingested telemetry. In order to discover
+//     new malicious entities, we enter all known threat indicators into a queue, then 
+//     search our forward and reverse hash tables. If the indicator is found, and the 
+//     associated entity with that indicator has not yet been tagged as a threat AND has a
+//     prevalence under our threshold, then we add that associated entity to our threat
+//     indicators queue. Loop until all threat indicators have been processed.
+// purge() - used to remove all references to a specified entity (eg. a filename or website)
+//     from the IntelWeb disk-based data structures (forward and reverse DiskMultiMap).
+
 #ifndef INTELWEB_H_
 #define INTELWEB_H_
 
@@ -35,9 +61,6 @@ private:
 	
 private:
 	bool prevalenceUnderThreshold(const std::string& key, unsigned int threshold);
-	unsigned int recursiveSearch(const std::string& indicator, unsigned int minPrevalenceToBeGood,
-		std::set<std::string>& badEntitiesFound,
-		std::set<InteractionTuple>& badInteractions);
 	InteractionTuple toInteractionTuple(const MultiMapTuple& m, bool forward);
 };
 
