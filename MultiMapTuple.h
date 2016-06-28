@@ -1,3 +1,5 @@
+// MultiMapTuple is a structure used to hold the 3 string values of each telemetry item.
+
 #ifndef MULTIMAPTUPLE_H_
 #define MULTIMAPTUPLE_H_
 
