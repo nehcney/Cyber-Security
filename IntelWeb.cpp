@@ -79,36 +79,6 @@ bool IntelWeb::ingest(const string& telemetryFile)
 	}
 	return true;
 }
-/*
-unsigned int IntelWeb::crawl(const vector<string>& indicators,
-	unsigned int minPrevalenceToBeGood,
-	vector<string>& badEntitiesFound,
-	vector<InteractionTuple>& badInteractions) // !!! make a separate version that uses queue not recursion
-{
-	if (!m_fileOpen)
-		return 0;
-
-	badEntitiesFound.clear();
-	badInteractions.clear();
-	set<string> badEntitiesSet;
-	set<InteractionTuple> badInteractionsSet;
-
-	// Do a recursive search through existing and new indicators
-	unsigned int count = 0;
-	for (unsigned int i = 0; i < indicators.size(); i++)
-		count += recursiveSearch
-		(indicators[i], minPrevalenceToBeGood, badEntitiesSet, badInteractionsSet);
-
-	// Copy over the ordered entities/interactions into the vectors
-	for (set<string>::iterator it = badEntitiesSet.begin(); 
-		it != badEntitiesSet.end(); ++it)
-		badEntitiesFound.push_back(*it);
-	for (set<InteractionTuple>::iterator it = badInteractionsSet.begin(); 
-		it != badInteractionsSet.end(); ++it)
-		badInteractions.push_back(*it);
-
-	return count;
-}*/
 
 unsigned int IntelWeb::crawl(const vector<string>& indicators,
 	unsigned int minPrevalenceToBeGood,
@@ -247,65 +217,6 @@ bool IntelWeb::prevalenceUnderThreshold(const string& key, unsigned int threshol
 		if (i >= threshold)
 			return false;
 	return i >= threshold ? false : true;
-}
-
-unsigned int IntelWeb::recursiveSearch(const string& indicator, unsigned int minPrevalenceToBeGood,
-	set<string>& badEntitiesFound,
-	set<InteractionTuple>& badInteractions)
-{
-	//bool indicatorIsInForward = true;
-	/*if (!it.isValid())
-	{
-		it = reverse.search(indicator); // if not found, search our reverse hash table
-		indicatorIsInForward = false; // !!! BUG: A is indicator, A creates B, and C creates A...C won't be found!
-	}*/
-	unsigned int count = 0;
-	DiskMultiMap::Iterator it = forward.search(indicator); // 1st, search our forward hash table
-	if (it.isValid())
-	{
-		// If we found the indicator in our data, insert the indicator into our set
-		// of badEntitiesFound. If it was already in our set, then immediately return 0.
-		pair<set<string>::iterator, bool> ret;
-		ret = badEntitiesFound.insert(indicator);
-		if (ret.second) // insert succeeded, item is unique
-		{
-			// Now we do a check for any newly associated entities. Because our indicator
-			// is always in the first slot, "key", and our third slot is always "context",
-			// a newly associated entity must be in the second slot, "value".
-			count++;
-			for (; it.isValid(); ++it)
-			{
-				MultiMapTuple m = *it;
-				// Add each interaction to our badInteractions set if unique.
-				badInteractions.insert(toInteractionTuple(m, true));
-				if (prevalenceUnderThreshold(m.value, minPrevalenceToBeGood))
-					// New associated entity has a P-value below our threshold, and it
-					// was successfully inserted to our set (which means it's unique).
-					// New entity is now an indicator! Do a recursive search.
-					count += recursiveSearch
-					(m.value, minPrevalenceToBeGood, badEntitiesFound, badInteractions);
-			}
-		}
-	}
-	it = reverse.search(indicator); // 2nd, search our reverse hash table
-	if (it.isValid())
-	{
-		pair<set<string>::iterator, bool> ret;
-		ret = badEntitiesFound.insert(indicator);
-		if (ret.second)
-		{
-			count++;
-			for (; it.isValid(); ++it)
-			{
-				MultiMapTuple m = *it;
-				badInteractions.insert(toInteractionTuple(m, false));
-				if (prevalenceUnderThreshold(m.value, minPrevalenceToBeGood))
-					count += recursiveSearch
-					(m.value, minPrevalenceToBeGood, badEntitiesFound, badInteractions);
-			}
-		}
-	}
-	return count;
 }
 
 InteractionTuple IntelWeb::toInteractionTuple(const MultiMapTuple& m, bool forward)
